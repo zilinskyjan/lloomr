@@ -41,11 +41,14 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="lloomr-development-version">lloomr (development version)<a class="anchor" aria-label="anchor" href="#lloomr-development-version"></a></h2>
-<ul><li>New results-persistence helpers: <code><a href="../reference/scores_wide.html">scores_wide()</a></code> (document x concept matrix with sanitized column names and join-safety assertions) and <code><a href="../reference/lloom_write.html">lloom_write()</a></code> (one call writes long/wide scores, the concept table, the evidence table, and <code>session.rds</code>).</li>
-<li>
-<code>lloom_export(collapse = TRUE)</code> flattens list columns so the evidence table writes straight to CSV.</li>
-<li>Documentation: explicit saving guidance (<code>readr::write_csv(...)</code>) in the manual, vignette, and README; new vignette section on scoring a human-written codebook without running concept generation.</li>
+<div class="section level3">
+<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<ul><li><p>Printing a concept table after dplyr column subsetting (e.g. <code>sess$concepts |&gt; select(name)</code>) no longer warns about an unknown <code>active</code> column or falsely reports “0 active”. The <code>&lt;lloom_concepts&gt;</code> header is now shown only when the full concept structure is present.</p></li>
+<li><p>New results-persistence helpers: <code><a href="../reference/scores_wide.html">scores_wide()</a></code> (document x concept matrix with sanitized column names and join-safety assertions) and <code><a href="../reference/lloom_write.html">lloom_write()</a></code> (one call writes long/wide scores, the concept table, the evidence table, and <code>session.rds</code>).</p></li>
+<li><p><code>lloom_export(collapse = TRUE)</code> flattens list columns so the evidence table writes straight to CSV.</p></li>
+<li><p>Documentation: explicit saving guidance (<code>readr::write_csv(...)</code>) in the manual, vignette, and README; new vignette section on scoring a human-written codebook without running concept generation.</p></li>
 </ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="lloomr-010">lloomr 0.1.0<a class="anchor" aria-label="anchor" href="#lloomr-010"></a></h2>
 <p>First release. Complete R implementation of the LLooM concept-induction algorithm (Lam et al., 2024, CHI), translated from the Python package <code>text_lloom</code> (upstream commit 8252533).</p>
