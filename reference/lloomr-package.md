@@ -1,7 +1,7 @@
 # lloomr: Concept Induction from Text with Large Language Models
 
-An R implementation of the LLooM concept induction algorithm (Lam et
-al., 2024,
+An R implementation of the LLooM concept induction algorithm (\[Lam et
+al., 2024\](https://doi.org/10.1145/3613904.3642830),
 [doi:10.1145/3613904.3642830](https://doi.org/10.1145/3613904.3642830) )
 for extracting and applying interpretable, high-level concepts from text
 data using large language models. The pipeline distills documents into
