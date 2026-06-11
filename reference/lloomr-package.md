@@ -25,7 +25,8 @@ Useful links:
 
 **Maintainer**: Jan Zilinsky <zilinsky09@gmail.com> \[copyright holder\]
 
-Authors:
+Other contributors:
 
-- Michelle Lam (Author of the original Python implementation
-  (text_lloom)) \[copyright holder\]
+- Michelle Lam (Copyright holder of the original Python implementation
+  (text_lloom), from which this package is translated) \[copyright
+  holder\]
