@@ -73,6 +73,8 @@ reference:
   - lloom_vis
   - concept_matrix
   - lloom_export
+  - concept_similarity
+  - lloom_concept_map
 
 - title: "LLM layer and prompts"
   desc: >
