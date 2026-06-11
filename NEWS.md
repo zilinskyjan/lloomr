@@ -8,6 +8,14 @@
   `<lloom_concepts>` header is now shown only when the full concept
   structure is present.
 
+## New features
+
+* `lloom_session()` gains a `chat` argument: one ellmer chat object (any
+  provider) configures all three pipeline steps; step-specific arguments
+  still override it.
+* `review_remove()` refuses to remove *all* concepts at once (it keeps
+  them and warns with guidance), so auto-review can no longer leave
+  `lloom_gen()` with an empty concept set.
 * New results-persistence helpers: `scores_wide()` (document x concept
   matrix with sanitized column names and join-safety assertions) and
   `lloom_write()` (one call writes long/wide scores, the concept table,
