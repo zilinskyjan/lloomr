@@ -192,7 +192,9 @@ test_that("lloom_concept_map returns a labeled scatter with attributes", {
   p <- lloom_concept_map(sess, method = "scores")
   expect_s3_class(p, "ggplot")
   geoms <- vapply(p$layers, function(l) class(l$geom)[1], character(1))
-  expect_setequal(geoms, c("GeomPoint", "GeomText"))
+  expect_true("GeomPoint" %in% geoms)
+  # Labels via ggrepel when available, plain geom_text otherwise
+  expect_true(any(grepl("GeomText", geoms)))
 
   sim <- attr(p, "similarity")
   expect_equal(dim(sim), c(3, 3))

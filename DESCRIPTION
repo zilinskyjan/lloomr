@@ -39,6 +39,7 @@ Imports:
     uwot
 Suggests:
     ggplot2,
+    ggrepel,
     knitr,
     rmarkdown,
     S7,

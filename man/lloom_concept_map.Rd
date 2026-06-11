@@ -40,6 +40,10 @@ labeled scatter: nearby concepts are similar; when scores are
 available, point size shows each concept's prevalence. The lloomr
 answer to "how close are my concepts to each other?".
 }
+\details{
+Labels are placed with \pkg{ggrepel} when it is installed (recommended
+— concepts that plot close together otherwise get overlapping labels).
+}
 \examples{
 \dontrun{
 lloom_concept_map(sess)                        # semantic proximity

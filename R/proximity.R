@@ -146,6 +146,9 @@ concept_similarity <- function(concepts,
 #' available, point size shows each concept's prevalence. The lloomr
 #' answer to "how close are my concepts to each other?".
 #'
+#' Labels are placed with \pkg{ggrepel} when it is installed (recommended
+#' — concepts that plot close together otherwise get overlapping labels).
+#'
 #' @param sess A [lloom_session()] with concepts (and, for
 #'   `method = "scores"` / `"centroids"` or prevalence sizing, scores).
 #' @param method `"embedding"` (semantic; default), `"scores"` (empirical
@@ -230,9 +233,19 @@ lloom_concept_map <- function(sess,
                           color = "#2c5f8a", alpha = 0.8) +
       ggplot2::scale_size_area(name = "Prevalence", max_size = 10)
   }
-  p +
+  # ggrepel keeps labels readable when concepts plot close together
+  # (e.g. near-duplicate concepts at almost identical coordinates)
+  label_layer <- if (requireNamespace("ggrepel", quietly = TRUE)) {
+    ggrepel::geom_text_repel(ggplot2::aes(label = .data$concept),
+                             size = 3.4, seed = 1,
+                             box.padding = 0.5, point.padding = 0.4,
+                             max.overlaps = Inf)
+  } else {
     ggplot2::geom_text(ggplot2::aes(label = .data$concept),
-                       vjust = -1.1, size = 3.4) +
+                       vjust = -1.1, size = 3.4, check_overlap = TRUE)
+  }
+  p +
+    label_layer +
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = 0.18)) +
     ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = 0.18)) +
     ggplot2::labs(
