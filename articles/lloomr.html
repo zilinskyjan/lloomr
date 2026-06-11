@@ -32,6 +32,12 @@
 <li class="active nav-item"><a class="nav-link" href="../articles/lloomr.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/proximity.html">Concept proximity analysis</a></li>
+  </ul>
+</li>
+<li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-news">
 <li><h6 class="dropdown-header" data-toc-skip>Releases</h6></li>
@@ -260,6 +266,9 @@ calls:</p>
 <p>The underlying tidy matrix is available via [concept_matrix()] for
 custom plots, and [lloom_export()] produces a per-concept evidence table
 (criteria, prevalence, highlight quotes).</p>
+<p>To analyze how concepts relate to <em>each other</em> — semantically,
+empirically, and via the documents they match — see
+<code><a href="../articles/proximity.html">vignette("proximity")</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="saving-your-results">Saving your results<a class="anchor" aria-label="anchor" href="#saving-your-results"></a>

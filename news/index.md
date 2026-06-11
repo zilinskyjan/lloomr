@@ -20,7 +20,9 @@
   each concept’s matched documents) — and
   [`lloom_concept_map()`](https://zilinskyjan.github.io/lloomr/reference/lloom_concept_map.md)
   plots concepts in 2D so closely related concepts appear near each
-  other (point size = prevalence).
+  other (point size = prevalence). A dedicated vignette walks through
+  all three views and how to read their disagreements:
+  [`vignette("proximity")`](https://zilinskyjan.github.io/lloomr/articles/proximity.md).
 - [`lloom_session()`](https://zilinskyjan.github.io/lloomr/reference/lloom_session.md)
   gains a `chat` argument: one ellmer chat object (any provider)
   configures all three pipeline steps; step-specific arguments still

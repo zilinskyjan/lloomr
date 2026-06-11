@@ -17,6 +17,10 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/lloomr.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/proximity.html">Concept proximity analysis</a></li>
+  </ul></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-news"><li><h6 class="dropdown-header" data-toc-skip>Releases</h6></li>
@@ -47,7 +51,7 @@
 </ul></div>
 <div class="section level3">
 <h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
-<ul><li>Concept proximity analysis: <code><a href="../reference/concept_similarity.html">concept_similarity()</a></code> computes pairwise concept similarity three ways — semantically (embeddings of the concept definitions), empirically (correlation of score vectors across documents), or corpus-grounded (<code>method = "centroids"</code>: cosine similarity between the centroids of each concept’s matched documents) — and <code><a href="../reference/lloom_concept_map.html">lloom_concept_map()</a></code> plots concepts in 2D so closely related concepts appear near each other (point size = prevalence).</li>
+<ul><li>Concept proximity analysis: <code><a href="../reference/concept_similarity.html">concept_similarity()</a></code> computes pairwise concept similarity three ways — semantically (embeddings of the concept definitions), empirically (correlation of score vectors across documents), or corpus-grounded (<code>method = "centroids"</code>: cosine similarity between the centroids of each concept’s matched documents) — and <code><a href="../reference/lloom_concept_map.html">lloom_concept_map()</a></code> plots concepts in 2D so closely related concepts appear near each other (point size = prevalence). A dedicated vignette walks through all three views and how to read their disagreements: <code><a href="../articles/proximity.html">vignette("proximity")</a></code>.</li>
 <li>
 <code><a href="../reference/lloom_session.html">lloom_session()</a></code> gains a <code>chat</code> argument: one ellmer chat object (any provider) configures all three pipeline steps; step-specific arguments still override it.</li>
 <li>
