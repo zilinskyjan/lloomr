@@ -20,9 +20,9 @@ Useful links:
 \author{
 \strong{Maintainer}: Jan Zilinsky \email{zilinsky09@gmail.com} [copyright holder]
 
-Authors:
+Other contributors:
 \itemize{
-  \item Michelle Lam (Author of the original Python implementation (text_lloom)) [copyright holder]
+  \item Michelle Lam (Copyright holder of the original Python implementation (text_lloom), from which this package is translated) [copyright holder]
 }
 
 }
