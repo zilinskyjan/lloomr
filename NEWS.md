@@ -10,15 +10,18 @@
 
 ## New features
 
-* Concept proximity analysis: `concept_similarity()` computes pairwise
-  concept similarity three ways — semantically (embeddings of the
-  concept definitions), empirically (correlation of score vectors
-  across documents), or corpus-grounded (`method = "centroids"`:
-  cosine similarity between the centroids of each concept's matched
-  documents) — and `lloom_concept_map()` plots concepts in 2D so
-  closely related concepts appear near each other (point size =
-  prevalence). A dedicated vignette walks through all three views and
-  how to read their disagreements: `vignette("proximity")`.
+* Concept proximity analysis:
+  * `concept_similarity()` computes pairwise concept similarity three
+    ways: semantic (embeddings of the concept definitions), empirical
+    (correlation of score vectors across documents), and
+    corpus-grounded (`method = "centroids"`: cosine similarity between
+    the centroids of each concept's matched documents).
+  * `lloom_concept_map()` plots concepts in 2D so closely related
+    concepts appear near each other; point size shows prevalence.
+  * Map labels are placed with ggrepel when it is installed, so
+    concepts that plot close together keep readable labels.
+  * A dedicated vignette walks through the three views and how to read
+    their disagreements: `vignette("proximity")`.
 * `lloom_session()` gains a `chat` argument: one ellmer chat object (any
   provider) configures all three pipeline steps; step-specific arguments
   still override it.
