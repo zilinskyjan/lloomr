@@ -42,6 +42,24 @@ test_that("validate_concepts catches structural problems", {
   expect_error(validate_concepts(flat), "list column")
 })
 
+test_that("printing survives dplyr column subsetting without false claims", {
+  cc <- new_concepts(c("A", "B"), c("Is it A?", "Is it B?"), active = TRUE)
+
+  # Full table: header reports the true active count
+  out_full <- capture.output(print(cc))
+  expect_match(out_full[1], "2 concepts \\(2 active\\)")
+
+  # After select(), the class persists but `active` is gone: no warning,
+  # no bogus "(0 active)" header (regression for a reported bug)
+  sub <- dplyr::select(cc, name)
+  expect_no_warning(out_sub <- capture.output(print(sub)))
+  expect_false(any(grepl("active", out_sub)))
+  expect_true(any(grepl("\\bname\\b", out_sub)))
+
+  # unique() on the subset also prints cleanly
+  expect_no_warning(capture.output(print(unique(sub))))
+})
+
 test_that("concepts_to_text formats the review-prompt block", {
   cc <- new_concepts(c("A", "B"), c("Is it A?", "Is it B?"))
   txt <- lloomr:::concepts_to_text(cc)

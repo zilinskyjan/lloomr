@@ -110,7 +110,14 @@ concepts_to_text <- function(concepts) {
 
 #' @export
 print.lloom_concepts <- function(x, ...) {
-  n_active <- sum(x$active, na.rm = TRUE)
-  cli::cli_text("{.cls lloom_concepts}: {nrow(x)} concept{?s} ({n_active} active)")
-  NextMethod()
+  # dplyr operations (e.g. select()) keep this class even when columns are
+  # dropped; only print the concept header when the structure is intact.
+  if ("active" %in% names(x)) {
+    cat(sprintf("<lloom_concepts>: %d concepts (%d active)\n",
+                nrow(x), sum(x$active, na.rm = TRUE)))
+  }
+  plain <- x
+  class(plain) <- setdiff(class(plain), "lloom_concepts")
+  print(plain, ...)
+  invisible(x)
 }
