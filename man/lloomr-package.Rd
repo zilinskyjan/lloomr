@@ -12,6 +12,7 @@ An R implementation of the LLooM concept induction algorithm (Lam et al., 2024, 
 Useful links:
 \itemize{
   \item \url{https://github.com/zilinskyjan/lloomr}
+  \item \url{https://zilinskyjan.github.io/lloomr/}
   \item Report bugs at \url{https://github.com/zilinskyjan/lloomr/issues}
 }
 

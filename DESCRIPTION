@@ -16,7 +16,7 @@ Description: An R implementation of the LLooM concept induction algorithm
     deduplicates the concept set, and then scores every document against
     every concept. Translated from the Python package 'text_lloom'.
 License: BSD_3_clause + file LICENSE
-URL: https://github.com/zilinskyjan/lloomr
+URL: https://github.com/zilinskyjan/lloomr, https://zilinskyjan.github.io/lloomr/
 BugReports: https://github.com/zilinskyjan/lloomr/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

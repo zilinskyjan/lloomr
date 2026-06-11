@@ -1,0 +1,99 @@
+url: https://zilinskyjan.github.io/lloomr/
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#2c5f8a"
+
+home:
+  title: "lloomr: Concept Induction from Text with LLMs"
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+
+reference:
+- title: "The session pipeline"
+  desc: >
+    The high-level API: bundle your data and models in a session, then
+    generate, select, and score concepts in a few calls.
+  contents:
+  - lloom_session
+  - lloom_gen
+  - lloom_score
+  - lloom_gen_auto
+  - lloom_select
+  - lloom_add_concept
+  - lloom_results
+  - lloom_suggest_params
+  - lloom_estimate_gen_cost
+  - lloom_estimate_score_cost
+  - summary.lloom_session
+
+- title: "Concepts"
+  desc: >
+    Concepts are tibbles — one row per concept, with a name and a
+    yes/no inclusion-criterion question. Write them by hand to score a
+    human codebook, or let the pipeline generate them.
+  contents:
+  - new_concepts
+  - validate_concepts
+
+- title: "Pipeline operators"
+  desc: >
+    Every stage as a standalone function on plain data frames —
+    distill, cluster, synthesize, review, score, refine.
+  contents:
+  - distill_filter
+  - distill_summarize
+  - cluster_texts
+  - synthesize_concepts
+  - review_concepts
+  - review_remove
+  - review_merge
+  - review_select
+  - score_concepts
+  - summarize_concept
+  - refine_concepts
+  - loop_docs
+
+- title: "One topic per document"
+  desc: >
+    Multi-label scores are the default; these helpers produce a
+    mutually exclusive partition from a fixed topic set.
+  contents:
+  - assign_topics
+  - slot_by_score
+
+- title: "Results: saving, reshaping, visualizing"
+  contents:
+  - scores_wide
+  - lloom_write
+  - lloom_vis
+  - concept_matrix
+  - lloom_export
+
+- title: "LLM layer and prompts"
+  desc: >
+    The infrastructure underneath: concurrent structured-output queries,
+    embeddings, prompt templates, and response schemas.
+  contents:
+  - ll_query
+  - ll_embed
+  - lloom_prompt
+  - render_prompt
+  - validate_prompt
+  - lloom_type
+
+- title: "Utilities"
+  contents:
+  - letter_to_score
+  - examples_to_json
+  - filter_empty_rows
+  - robust_json_parse
+
+news:
+  releases:
+  - text: "lloomr 0.1.0"
+    href: https://github.com/zilinskyjan/lloomr/releases/tag/v0.1.0
