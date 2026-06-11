@@ -1,3 +1,15 @@
+# lloomr (development version)
+
+* New results-persistence helpers: `scores_wide()` (document x concept
+  matrix with sanitized column names and join-safety assertions) and
+  `lloom_write()` (one call writes long/wide scores, the concept table,
+  the evidence table, and `session.rds`).
+* `lloom_export(collapse = TRUE)` flattens list columns so the evidence
+  table writes straight to CSV.
+* Documentation: explicit saving guidance (`readr::write_csv(...)`) in
+  the manual, vignette, and README; new vignette section on scoring a
+  human-written codebook without running concept generation.
+
 # lloomr 0.1.0
 
 First release. Complete R implementation of the LLooM concept-induction

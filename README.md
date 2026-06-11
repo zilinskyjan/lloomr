@@ -57,6 +57,19 @@ Beyond the Python original, lloomr adds **single-label classification**
 into a fixed topic set: `assign_topics()` (forced-choice, schema-
 constrained) and `slot_by_score()` (free argmax over existing scores).
 
+**Concept generation is optional.** To score a human-written codebook,
+skip generation entirely:
+
+```r
+codebook <- new_concepts(
+  name   = c("Economic Anxiety", "Media Distrust"),
+  prompt = c("Does the text express concern about economic conditions?",
+             "Does the text express distrust toward news media?"),
+  active = TRUE
+)
+score_df <- score_concepts(df, "text", "doc_id", codebook, chat)
+```
+
 ## Documentation
 
 - `vignette("lloomr")` — package vignette (pipeline, single-label

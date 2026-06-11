@@ -71,6 +71,44 @@ Every step is also a standalone function on plain data frames
 (`distill_summarize()`, `cluster_texts()`, `synthesize_concepts()`, ...) —
 the session is a convenience, not a requirement.
 
+## Bring your own concepts (scoring a human codebook)
+
+Concept *generation* is optional. If you already have a codebook —
+theory-driven categories, concepts from a previous study, or hand-edited
+output of an earlier run — you can use lloomr purely **deductively**:
+write the concepts yourself and score every document against them. Each
+concept just needs a name and a yes/no inclusion-criterion question:
+
+```{r byo-concepts, eval = FALSE}
+codebook <- new_concepts(
+  name = c("Economic Anxiety", "Media Distrust"),
+  prompt = c(
+    "Does the text express concern about economic conditions?",
+    "Does the text express distrust toward news media?"
+  ),
+  active = TRUE
+)
+
+chat <- ellmer::chat_openai(model = "gpt-5.4-nano", echo = "none")
+score_df <- score_concepts(df, "text", "doc_id", codebook, chat,
+                           get_highlights = TRUE)
+```
+
+The same works inside a session — skip `lloom_gen()` entirely and add
+concepts by hand:
+
+```{r byo-session, eval = FALSE}
+sess <- lloom_session(df, "text", "doc_id")
+sess <- lloom_add_concept(sess, "Economic Anxiety",
+                          "Does the text express concern about economic conditions?")
+sess <- lloom_add_concept(sess, "Media Distrust",
+                          "Does the text express distrust toward news media?")
+sess <- lloom_score(sess)
+```
+
+And for mutually exclusive categories, [assign_topics()] accepts a plain
+character vector of topic names — no concept objects needed at all.
+
 ## Multi-label scores, single-label topics
 
 Scoring is **multi-label**: each (document, concept) pair is rated
