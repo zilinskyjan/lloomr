@@ -1,0 +1,137 @@
+---
+title: "Concept induction with lloomr"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Concept induction with lloomr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(lloomr)
+set.seed(1)
+```
+
+lloomr is an R implementation of the **LLooM** concept-induction algorithm
+(Lam et al., 2024, CHI; Python package `text_lloom`). From a collection of
+texts, it induces interpretable **concepts** — each a short name plus a
+one-sentence inclusion criterion — and then scores every document against
+every concept.
+
+The pipeline:
+
+1. **Distill** — extract salient quotes ([distill_filter()], optional) and
+   compress to bullet points ([distill_summarize()]).
+2. **Cluster** — embed bullets, reduce with UMAP, cluster with HDBSCAN
+   ([cluster_texts()]).
+3. **Synthesize** — an LLM proposes named concepts per cluster
+   ([synthesize_concepts()]).
+4. **Review** — remove weak concepts, merge overlaps, select the best
+   ([review_concepts()]).
+5. **Score** — rate every document against every concept on a 5-point
+   scale ([score_concepts()]).
+6. **Refine / loop** — drop generic or rare concepts
+   ([refine_concepts()]), find uncovered documents ([loop_docs()]).
+
+LLM calls go through [ellmer](https://ellmer.tidyverse.org) chat objects,
+so any supported provider works; responses are constrained by structured
+output schemas, not parsed out of free text.
+
+## The session pipeline
+
+The chunks below are not evaluated in this vignette (they call LLM APIs);
+they show the canonical workflow. With an `OPENAI_API_KEY` set, they run
+as-is.
+
+```{r pipeline, eval = FALSE}
+library(lloomr)
+
+# df has one row per document, with columns "text" and "doc_id"
+sess <- lloom_session(df, text_col = "text", id_col = "doc_id")
+
+# Estimate cost before spending anything
+lloom_estimate_gen_cost(sess)
+
+# Distill -> cluster -> synthesize -> review; activate the best 8 concepts.
+# `seed` steers generation toward a topic of interest (optional);
+# `sample_n` generates concepts from a sample while scoring stays full.
+sess <- lloom_gen(sess, seed = "media trust", max_concepts = 8, sample_n = 200)
+sess$concepts
+
+# Score every document against the active concepts
+sess <- lloom_score(sess)
+score_df <- lloom_results(sess)
+
+# Time, tokens, and dollars per step
+summary(sess)
+```
+
+Every step is also a standalone function on plain data frames
+(`distill_summarize()`, `cluster_texts()`, `synthesize_concepts()`, ...) —
+the session is a convenience, not a requirement.
+
+## Multi-label scores, single-label topics
+
+Scoring is **multi-label**: each (document, concept) pair is rated
+independently, so a document can match several concepts or none. When a
+mutually exclusive partition is needed, freeze a topic set and use one of:
+
+```{r single-label, eval = FALSE}
+# Forced-choice LLM classification (labels constrained to your topic set)
+assignments <- assign_topics(df, "text", "doc_id", sess$concepts, chat)
+
+# Or: free, deterministic argmax over existing scores
+slotted <- slot_by_score(score_df, "doc_id", threshold = 1)
+```
+
+## Visualizing results
+
+[lloom_vis()] draws the concept-by-group heatmap (the R replacement for
+the Python package's interactive matrix widget). It needs only a scored
+session, so we demonstrate with a small synthetic one — no API calls:
+
+```{r vis-demo, fig.width = 6.5, fig.height = 3, eval = requireNamespace("ggplot2", quietly = TRUE)}
+docs <- data.frame(
+  doc_id = as.character(1:8),
+  text = paste("document", 1:8),
+  party = rep(c("D", "R"), each = 4)
+)
+concepts <- new_concepts(
+  name = c("Media Distrust", "Vaccine Promotion"),
+  prompt = c("Distrusts media?", "Promotes vaccines?"),
+  active = TRUE
+)
+
+# A synthetic score grid (in practice: lloom_score() / score_concepts())
+score_df <- expand.grid(
+  doc_id = docs$doc_id, concept_name = concepts$name,
+  stringsAsFactors = FALSE
+)
+score_df$concept_id <- concepts$id[match(score_df$concept_name, concepts$name)]
+score_df$text <- docs$text[match(score_df$doc_id, docs$doc_id)]
+score_df$score <- c(1, 1, 0, 0, 1, 1, 1, 0,   # Media Distrust
+                    0, 1, 1, 0, 0, 0, 0, 0)   # Vaccine Promotion
+score_df$rationale <- ""
+score_df$highlight <- ""
+score_df$concept_seed <- NA_character_
+
+sess <- lloom_session(docs, "text", "doc_id",
+                      distill_chat = "unused", synth_chat = "unused",
+                      score_chat = "unused")
+sess$concepts <- concepts
+sess$score_df <- score_df
+
+lloom_vis(sess, slice_col = "party")
+```
+
+The underlying tidy matrix is available via [concept_matrix()] for custom
+plots, and [lloom_export()] produces a per-concept evidence table
+(criteria, prevalence, highlight quotes).
+
+## Further reading
+
+- Lam, M., et al. (2024). *Concept Induction: Analyzing Unstructured Text
+  with High-Level Concepts Using LLooM.* CHI 2024.
+  <https://doi.org/10.1145/3613904.3642830>
+- Upstream Python package: <https://github.com/michelle123lam/lloom>

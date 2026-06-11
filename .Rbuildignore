@@ -1,0 +1,6 @@
+^\.git$
+^\.gitignore$
+^.*\.Rproj$
+^\.Rproj\.user$
+^README\.md$
+^\.DS_Store$
