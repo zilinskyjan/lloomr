@@ -6,48 +6,72 @@
 \usage{
 concept_similarity(
   concepts,
-  method = c("embedding", "scores"),
+  method = c("embedding", "scores", "centroids"),
   score_df = NULL,
   id_col = NULL,
   embed_fn = NULL,
-  embed_model = "text-embedding-3-large"
+  embed_model = "text-embedding-3-large",
+  threshold = 1,
+  doc_embeddings = NULL
 )
 }
 \arguments{
 \item{concepts}{A concept tibble (see \code{\link[=new_concepts]{new_concepts()}}).}
 
-\item{method}{\code{"embedding"} (semantic similarity of the concept
-definitions) or \code{"scores"} (empirical co-matching in a scored
-corpus).}
+\item{method}{\code{"embedding"}, \code{"scores"}, or \code{"centroids"} (see above).}
 
-\item{score_df}{Required for \code{method = "scores"}: output of
+\item{score_df}{Required for \code{"scores"} and \code{"centroids"}: output of
 \code{\link[=score_concepts]{score_concepts()}} / \code{\link[=lloom_results]{lloom_results()}}.}
 
-\item{id_col}{Required for \code{method = "scores"}: the document ID column
-in \code{score_df}.}
+\item{id_col}{Required for \code{"scores"} and \code{"centroids"}: the document
+ID column in \code{score_df}.}
 
-\item{embed_fn}{Embedding function for \code{method = "embedding"}
+\item{embed_fn}{Embedding function for \code{"embedding"} and \code{"centroids"}
 (character vector in, matrix out). Defaults to \code{\link[=ll_embed]{ll_embed()}} with
 \code{embed_model}.}
 
 \item{embed_model}{Embedding model for the default \code{embed_fn}.}
+
+\item{threshold}{For \code{"centroids"}: minimum score for a document to
+count as a match. Default 1.}
+
+\item{doc_embeddings}{For \code{"centroids"}: optional precomputed document
+embedding matrix with document IDs as rownames (avoids re-embedding,
+e.g. across repeated calls). Defaults to embedding the matched
+documents' text from \code{score_df}.}
 }
 \value{
 A symmetric numeric matrix with concept names as dimnames.
-Diagonal is 1.
+Diagonal is 1. Concepts that cannot be placed (absent from
+\code{score_df}, or no matches for \code{"centroids"}) are dropped with a
+warning.
 }
 \description{
-Computes a symmetric concept-by-concept similarity matrix, either from
-embeddings of the concept definitions (\code{method = "embedding"}: cosine
-similarity of the embedded \code{"name: prompt"} texts) or from scoring
-results (\code{method = "scores"}: Pearson correlation of the concepts'
-score vectors across documents).
+Computes a symmetric concept-by-concept similarity matrix using one of
+three notions of proximity:
+}
+\details{
+\itemize{
+\item \code{"embedding"} — \emph{semantic}: cosine similarity of the embedded
+concept definitions (\code{"name: prompt"} texts). Do the concepts mean
+similar things?
+\item \code{"scores"} — \emph{empirical co-matching}: Pearson correlation of the
+concepts' score vectors across documents. Do the concepts fire on
+the same documents?
+\item \code{"centroids"} — \emph{corpus-grounded}: each concept is represented by
+the centroid (mean embedding) of the documents it matched; cosine
+similarity between centroids. Do the concepts' matches live in the
+same semantic territory? (Unlike \code{"scores"}, two concepts can be
+centroid-close while matching disjoint sets of documents.)
+}
 }
 \examples{
 \dontrun{
 cc <- sess$concepts[sess$concepts$active, ]
 concept_similarity(cc)                          # semantic
 concept_similarity(cc, method = "scores",       # empirical
+                   score_df = lloom_results(sess), id_col = "doc_id")
+concept_similarity(cc, method = "centroids",    # corpus-grounded
                    score_df = lloom_results(sess), id_col = "doc_id")
 }
 }

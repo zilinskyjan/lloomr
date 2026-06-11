@@ -90,6 +90,96 @@ test_that("zero-variance concepts get similarity 0, not NA", {
   expect_equal(sim["Sourdough Baking", "Sourdough Baking"], 1)
 })
 
+test_that("concept_similarity (centroids) measures matched-document territory", {
+  cc <- prox_concepts()
+  # Docs 1-4: politics-flavored embeddings; docs 5-8: baking-flavored.
+  # "Media Distrust" matches docs 1-2, "Press Skepticism" matches docs 3-4
+  # (DISJOINT sets, same territory); "Sourdough Baking" matches docs 5-6.
+  doc_vecs <- rbind(
+    c(1, 0.1, 0), c(0.95, 0.15, 0), c(0.9, 0.05, 0), c(1, 0.12, 0),
+    c(0, 0, 1), c(0.05, 0, 0.95), c(0, 0.05, 1), c(0.02, 0, 1)
+  )
+  embed_by_text <- function(texts) {
+    idx <- as.integer(sub("doc ", "", texts))
+    doc_vecs[idx, , drop = FALSE]
+  }
+  ids <- as.character(1:8)
+  score_df <- dplyr::bind_rows(lapply(1:3, function(i) {
+    match_ids <- list(c("1", "2"), c("3", "4"), c("5", "6"))[[i]]
+    tibble::tibble(
+      doc_id = ids, text = paste("doc", ids),
+      concept_id = cc$id[i], concept_name = cc$name[i],
+      score = as.numeric(ids %in% match_ids),
+      rationale = "", highlight = "", concept_seed = NA_character_
+    )
+  }))
+
+  sim <- concept_similarity(cc, method = "centroids",
+                            score_df = score_df, id_col = "doc_id",
+                            embed_fn = embed_by_text)
+  # Disjoint matches, same semantic territory -> centroid-close
+  expect_gt(sim["Media Distrust", "Press Skepticism"], 0.99)
+  expect_lt(sim["Media Distrust", "Sourdough Baking"], 0.15)
+  expect_equal(diag(sim), rep(1, 3), ignore_attr = TRUE)
+
+  # ... while score correlation sees the SAME pair as anti-correlated
+  sim_scores <- concept_similarity(cc, method = "scores",
+                                   score_df = score_df, id_col = "doc_id")
+  expect_lt(sim_scores["Media Distrust", "Press Skepticism"], 0)
+
+  # Precomputed doc_embeddings path (no embed_fn call)
+  pre <- doc_vecs
+  rownames(pre) <- ids
+  sim_pre <- concept_similarity(cc, method = "centroids",
+                                score_df = score_df, id_col = "doc_id",
+                                embed_fn = function(t) stop("must not embed"),
+                                doc_embeddings = pre)
+  expect_equal(sim, sim_pre)
+
+  # Missing rownames in precomputed embeddings -> clear error
+  bad <- pre[1:3, , drop = FALSE]
+  expect_error(
+    concept_similarity(cc, method = "centroids", score_df = score_df,
+                       id_col = "doc_id", doc_embeddings = bad),
+    "missing from"
+  )
+
+  # Concept with no matches at threshold is dropped with a warning
+  score_df2 <- score_df
+  score_df2$score[score_df2$concept_name == "Sourdough Baking"] <- 0.5
+  expect_warning(
+    sim_drop <- concept_similarity(cc, method = "centroids",
+                                   score_df = score_df2, id_col = "doc_id",
+                                   embed_fn = embed_by_text),
+    "no matches"
+  )
+  expect_equal(dim(sim_drop), c(2, 2))
+  # ... but lowering the threshold restores it
+  sim_low <- concept_similarity(cc, method = "centroids",
+                                score_df = score_df2, id_col = "doc_id",
+                                embed_fn = embed_by_text, threshold = 0.5)
+  expect_equal(dim(sim_low), c(3, 3))
+
+  expect_error(concept_similarity(cc, method = "centroids"), "score_df")
+})
+
+test_that("lloom_concept_map supports the centroids method", {
+  skip_if_not_installed("ggplot2")
+  cc <- prox_concepts()
+  docs <- data.frame(doc_id = as.character(1:8), text = paste("doc", 1:8))
+  sess <- lloom_session(docs, "text", "doc_id",
+                        distill_chat = "f", synth_chat = "f", score_chat = "f")
+  sess$concepts <- cc
+  sess$score_df <- prox_scores(cc)
+  sess$embed_fn <- function(texts) {
+    matrix(rep(seq_along(texts), each = 3), ncol = 3, byrow = TRUE) + 0.5
+  }
+  p <- lloom_concept_map(sess, method = "centroids")
+  expect_s3_class(p, "ggplot")
+  expect_match(p$labels$subtitle, "centroids")
+  expect_equal(dim(attr(p, "similarity")), c(3, 3))
+})
+
 test_that("lloom_concept_map returns a labeled scatter with attributes", {
   skip_if_not_installed("ggplot2")
   cc <- prox_concepts()

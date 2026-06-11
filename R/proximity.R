@@ -13,26 +13,41 @@
 
 #' Pairwise similarity between concepts
 #'
-#' Computes a symmetric concept-by-concept similarity matrix, either from
-#' embeddings of the concept definitions (`method = "embedding"`: cosine
-#' similarity of the embedded `"name: prompt"` texts) or from scoring
-#' results (`method = "scores"`: Pearson correlation of the concepts'
-#' score vectors across documents).
+#' Computes a symmetric concept-by-concept similarity matrix using one of
+#' three notions of proximity:
+#'
+#' * `"embedding"` — *semantic*: cosine similarity of the embedded
+#'   concept definitions (`"name: prompt"` texts). Do the concepts mean
+#'   similar things?
+#' * `"scores"` — *empirical co-matching*: Pearson correlation of the
+#'   concepts' score vectors across documents. Do the concepts fire on
+#'   the same documents?
+#' * `"centroids"` — *corpus-grounded*: each concept is represented by
+#'   the centroid (mean embedding) of the documents it matched; cosine
+#'   similarity between centroids. Do the concepts' matches live in the
+#'   same semantic territory? (Unlike `"scores"`, two concepts can be
+#'   centroid-close while matching disjoint sets of documents.)
 #'
 #' @param concepts A concept tibble (see [new_concepts()]).
-#' @param method `"embedding"` (semantic similarity of the concept
-#'   definitions) or `"scores"` (empirical co-matching in a scored
-#'   corpus).
-#' @param score_df Required for `method = "scores"`: output of
+#' @param method `"embedding"`, `"scores"`, or `"centroids"` (see above).
+#' @param score_df Required for `"scores"` and `"centroids"`: output of
 #'   [score_concepts()] / [lloom_results()].
-#' @param id_col Required for `method = "scores"`: the document ID column
-#'   in `score_df`.
-#' @param embed_fn Embedding function for `method = "embedding"`
+#' @param id_col Required for `"scores"` and `"centroids"`: the document
+#'   ID column in `score_df`.
+#' @param embed_fn Embedding function for `"embedding"` and `"centroids"`
 #'   (character vector in, matrix out). Defaults to [ll_embed()] with
 #'   `embed_model`.
 #' @param embed_model Embedding model for the default `embed_fn`.
+#' @param threshold For `"centroids"`: minimum score for a document to
+#'   count as a match. Default 1.
+#' @param doc_embeddings For `"centroids"`: optional precomputed document
+#'   embedding matrix with document IDs as rownames (avoids re-embedding,
+#'   e.g. across repeated calls). Defaults to embedding the matched
+#'   documents' text from `score_df`.
 #' @return A symmetric numeric matrix with concept names as dimnames.
-#'   Diagonal is 1.
+#'   Diagonal is 1. Concepts that cannot be placed (absent from
+#'   `score_df`, or no matches for `"centroids"`) are dropped with a
+#'   warning.
 #' @export
 #' @examples
 #' \dontrun{
@@ -40,13 +55,17 @@
 #' concept_similarity(cc)                          # semantic
 #' concept_similarity(cc, method = "scores",       # empirical
 #'                    score_df = lloom_results(sess), id_col = "doc_id")
+#' concept_similarity(cc, method = "centroids",    # corpus-grounded
+#'                    score_df = lloom_results(sess), id_col = "doc_id")
 #' }
 concept_similarity <- function(concepts,
-                               method = c("embedding", "scores"),
+                               method = c("embedding", "scores", "centroids"),
                                score_df = NULL,
                                id_col = NULL,
                                embed_fn = NULL,
-                               embed_model = "text-embedding-3-large") {
+                               embed_model = "text-embedding-3-large",
+                               threshold = 1,
+                               doc_embeddings = NULL) {
   validate_concepts(concepts)
   method <- match.arg(method)
   stopifnot(nrow(concepts) >= 2)
@@ -59,6 +78,41 @@ concept_similarity <- function(concepts,
     stopifnot(is.matrix(emb), nrow(emb) == nrow(concepts))
     emb_norm <- emb / sqrt(rowSums(emb^2))
     sim <- emb_norm %*% t(emb_norm)
+  } else if (method == "centroids") {
+    if (is.null(score_df) || is.null(id_col)) {
+      cli::cli_abort("{.code method = \"centroids\"} requires {.arg score_df} and {.arg id_col}.")
+    }
+    matched <- score_df[score_df$score >= threshold &
+                          score_df$concept_name %in% concepts$name, , drop = FALSE]
+    n_matches <- table(matched$concept_name)
+    placeable <- concepts$name[concepts$name %in% names(n_matches)]
+    if (length(placeable) < nrow(concepts)) {
+      dropped <- setdiff(concepts$name, placeable)
+      cli::cli_warn("{length(dropped)} concept{?s} with no matches at threshold {threshold}; dropped from the similarity matrix: {.val {dropped}}")
+      concepts <- concepts[concepts$name %in% placeable, , drop = FALSE]
+      stopifnot(nrow(concepts) >= 2)
+      matched <- matched[matched$concept_name %in% placeable, , drop = FALSE]
+    }
+
+    if (is.null(doc_embeddings)) {
+      if (is.null(embed_fn)) {
+        embed_fn <- function(t) ll_embed(t, model = embed_model)
+      }
+      docs <- matched[!duplicated(matched[[id_col]]), c(id_col, "text"), drop = FALSE]
+      doc_embeddings <- embed_fn(docs$text)
+      rownames(doc_embeddings) <- docs[[id_col]]
+    }
+    missing_ids <- setdiff(unique(matched[[id_col]]), rownames(doc_embeddings))
+    if (length(missing_ids) > 0) {
+      cli::cli_abort("{length(missing_ids)} matched document{?s} missing from {.arg doc_embeddings} rownames.")
+    }
+
+    centroids <- do.call(rbind, lapply(concepts$name, function(cn) {
+      ids <- matched[[id_col]][matched$concept_name == cn]
+      colMeans(doc_embeddings[ids, , drop = FALSE])
+    }))
+    cen_norm <- centroids / sqrt(rowSums(centroids^2))
+    sim <- cen_norm %*% t(cen_norm)
   } else {
     if (is.null(score_df) || is.null(id_col)) {
       cli::cli_abort("{.code method = \"scores\"} requires {.arg score_df} and {.arg id_col}.")
@@ -93,25 +147,30 @@ concept_similarity <- function(concepts,
 #' answer to "how close are my concepts to each other?".
 #'
 #' @param sess A [lloom_session()] with concepts (and, for
-#'   `method = "scores"` or prevalence sizing, scores).
-#' @param method `"embedding"` (semantic; default) or `"scores"`
-#'   (empirical co-matching). See [concept_similarity()].
-#' @param threshold Minimum score counting as a match for prevalence
-#'   sizing. Default 1.
+#'   `method = "scores"` / `"centroids"` or prevalence sizing, scores).
+#' @param method `"embedding"` (semantic; default), `"scores"` (empirical
+#'   co-matching), or `"centroids"` (corpus-grounded: centroids of each
+#'   concept's matched documents). See [concept_similarity()].
+#' @param threshold Minimum score counting as a match (for prevalence
+#'   sizing and the `"centroids"` method). Default 1.
 #' @param embed_fn Optional embedding function override.
+#' @param doc_embeddings Optional precomputed document embeddings for
+#'   `"centroids"` (see [concept_similarity()]).
 #' @return A ggplot object. The similarity matrix is attached as
 #'   attribute `"similarity"`, and the MDS coordinates as attribute
 #'   `"coords"`.
 #' @export
 #' @examples
 #' \dontrun{
-#' lloom_concept_map(sess)                      # semantic proximity
-#' lloom_concept_map(sess, method = "scores")   # empirical proximity
+#' lloom_concept_map(sess)                        # semantic proximity
+#' lloom_concept_map(sess, method = "scores")     # empirical proximity
+#' lloom_concept_map(sess, method = "centroids")  # corpus-grounded
 #' }
 lloom_concept_map <- function(sess,
-                              method = c("embedding", "scores"),
+                              method = c("embedding", "scores", "centroids"),
                               threshold = 1,
-                              embed_fn = NULL) {
+                              embed_fn = NULL,
+                              doc_embeddings = NULL) {
   stopifnot(inherits(sess, "lloom_session"))
   method <- match.arg(method)
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
@@ -127,10 +186,18 @@ lloom_concept_map <- function(sess,
     method = method,
     score_df = sess$score_df,
     id_col = sess$id_col,
-    embed_fn = embed_fn %||% if (method == "embedding") sess$embed_fn
+    embed_fn = embed_fn %||% if (method != "scores") sess$embed_fn,
+    threshold = threshold,
+    doc_embeddings = doc_embeddings
   )
 
-  coords <- stats::cmdscale(stats::as.dist(1 - sim), k = 2)
+  coords <- suppressWarnings(stats::cmdscale(stats::as.dist(1 - sim), k = 2))
+  if (ncol(coords) < 2) {
+    # Degenerate case: (near-)identical concepts give a ~zero distance
+    # matrix and MDS returns fewer than 2 dimensions; pad with zeros.
+    cli::cli_inform("Concepts are (near-)identical under this method; map coordinates are degenerate.")
+    coords <- cbind(coords, matrix(0, nrow(sim), 2 - ncol(coords)))
+  }
   plot_df <- tibble::tibble(
     concept = rownames(sim),
     dim1 = coords[, 1],
@@ -148,11 +215,11 @@ lloom_concept_map <- function(sess,
     plot_df$prevalence <- NA_real_
   }
 
-  method_lab <- if (method == "embedding") {
-    "semantic similarity of concept definitions (embeddings)"
-  } else {
-    "correlation of concept scores across documents"
-  }
+  method_lab <- switch(method,
+    embedding = "semantic similarity of concept definitions (embeddings)",
+    scores = "correlation of concept scores across documents",
+    centroids = "similarity of matched-document centroids (embeddings)"
+  )
 
   p <- ggplot2::ggplot(plot_df, ggplot2::aes(x = .data$dim1, y = .data$dim2))
   if (all(is.na(plot_df$prevalence))) {

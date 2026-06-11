@@ -6,22 +6,27 @@
 \usage{
 lloom_concept_map(
   sess,
-  method = c("embedding", "scores"),
+  method = c("embedding", "scores", "centroids"),
   threshold = 1,
-  embed_fn = NULL
+  embed_fn = NULL,
+  doc_embeddings = NULL
 )
 }
 \arguments{
 \item{sess}{A \code{\link[=lloom_session]{lloom_session()}} with concepts (and, for
-\code{method = "scores"} or prevalence sizing, scores).}
+\code{method = "scores"} / \code{"centroids"} or prevalence sizing, scores).}
 
-\item{method}{\code{"embedding"} (semantic; default) or \code{"scores"}
-(empirical co-matching). See \code{\link[=concept_similarity]{concept_similarity()}}.}
+\item{method}{\code{"embedding"} (semantic; default), \code{"scores"} (empirical
+co-matching), or \code{"centroids"} (corpus-grounded: centroids of each
+concept's matched documents). See \code{\link[=concept_similarity]{concept_similarity()}}.}
 
-\item{threshold}{Minimum score counting as a match for prevalence
-sizing. Default 1.}
+\item{threshold}{Minimum score counting as a match (for prevalence
+sizing and the \code{"centroids"} method). Default 1.}
 
 \item{embed_fn}{Optional embedding function override.}
+
+\item{doc_embeddings}{Optional precomputed document embeddings for
+\code{"centroids"} (see \code{\link[=concept_similarity]{concept_similarity()}}).}
 }
 \value{
 A ggplot object. The similarity matrix is attached as
@@ -37,7 +42,8 @@ answer to "how close are my concepts to each other?".
 }
 \examples{
 \dontrun{
-lloom_concept_map(sess)                      # semantic proximity
-lloom_concept_map(sess, method = "scores")   # empirical proximity
+lloom_concept_map(sess)                        # semantic proximity
+lloom_concept_map(sess, method = "scores")     # empirical proximity
+lloom_concept_map(sess, method = "centroids")  # corpus-grounded
 }
 }
