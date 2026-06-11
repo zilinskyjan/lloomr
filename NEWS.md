@@ -1,16 +1,5 @@
 # lloomr (development version)
 
-## Bug fixes
-
-* Printing a concept table after dplyr column subsetting (e.g.
-  `sess$concepts |> select(name)`) no longer warns about an unknown
-  `active` column or falsely reports "0 active". The
-  `<lloom_concepts>` header is now shown only when the full concept
-  structure is present.
-* `review_remove()` refuses to remove *all* concepts at once (it keeps
-  them and warns with guidance), so auto-review can no longer leave
-  `lloom_gen()` with an empty concept set.
-
 ## New features
 
 * Concept proximity analysis:
@@ -40,6 +29,17 @@
 * Documentation: explicit saving guidance (`readr::write_csv(...)`) in
   the manual, vignette, and README; new vignette section on scoring a
   human-written codebook without running concept generation.
+
+## Bug fixes
+
+* Printing a concept table after dplyr column subsetting (e.g.
+  `sess$concepts |> select(name)`) no longer warns about an unknown
+  `active` column or falsely reports "0 active". The
+  `<lloom_concepts>` header is now shown only when the full concept
+  structure is present.
+* `review_remove()` refuses to remove *all* concepts at once (it keeps
+  them and warns with guidance), so auto-review can no longer leave
+  `lloom_gen()` with an empty concept set.
 
 # lloomr 0.1.0
 
