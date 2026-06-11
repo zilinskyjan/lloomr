@@ -1,0 +1,5 @@
+# License
+
+    YEAR: 2024-2026
+    COPYRIGHT HOLDER: Michelle Lam (original Python implementation), Jan Zilinsky (R translation)
+    ORGANIZATION: none
