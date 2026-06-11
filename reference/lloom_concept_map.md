@@ -53,6 +53,11 @@ lloom_concept_map(
 A ggplot object. The similarity matrix is attached as attribute
 `"similarity"`, and the MDS coordinates as attribute `"coords"`.
 
+## Details
+
+Labels are placed with ggrepel when it is installed (recommended —
+concepts that plot close together otherwise get overlapping labels).
+
 ## Examples
 
 ``` r
