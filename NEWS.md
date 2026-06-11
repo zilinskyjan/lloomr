@@ -1,5 +1,13 @@
 # lloomr (development version)
 
+## Bug fixes
+
+* Printing a concept table after dplyr column subsetting (e.g.
+  `sess$concepts |> select(name)`) no longer warns about an unknown
+  `active` column or falsely reports "0 active". The
+  `<lloom_concepts>` header is now shown only when the full concept
+  structure is present.
+
 * New results-persistence helpers: `scores_wide()` (document x concept
   matrix with sanitized column names and join-safety assertions) and
   `lloom_write()` (one call writes long/wide scores, the concept table,
