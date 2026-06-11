@@ -9,6 +9,17 @@
   `active` column or falsely reports “0 active”. The `<lloom_concepts>`
   header is now shown only when the full concept structure is present.
 
+### New features
+
+- [`lloom_session()`](https://zilinskyjan.github.io/lloomr/reference/lloom_session.md)
+  gains a `chat` argument: one ellmer chat object (any provider)
+  configures all three pipeline steps; step-specific arguments still
+  override it.
+- [`review_remove()`](https://zilinskyjan.github.io/lloomr/reference/review_remove.md)
+  refuses to remove *all* concepts at once (it keeps them and warns with
+  guidance), so auto-review can no longer leave
+  [`lloom_gen()`](https://zilinskyjan.github.io/lloomr/reference/lloom_gen.md)
+  with an empty concept set.
 - New results-persistence helpers:
   [`scores_wide()`](https://zilinskyjan.github.io/lloomr/reference/scores_wide.md)
   (document x concept matrix with sanitized column names and join-safety
@@ -16,10 +27,8 @@
   [`lloom_write()`](https://zilinskyjan.github.io/lloomr/reference/lloom_write.md)
   (one call writes long/wide scores, the concept table, the evidence
   table, and `session.rds`).
-
 - `lloom_export(collapse = TRUE)` flattens list columns so the evidence
   table writes straight to CSV.
-
 - Documentation: explicit saving guidance (`readr::write_csv(...)`) in
   the manual, vignette, and README; new vignette section on scoring a
   human-written codebook without running concept generation.
