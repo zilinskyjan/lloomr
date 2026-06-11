@@ -9,6 +9,7 @@
 <url><loc>https://zilinskyjan.github.io/lloomr/reference/assign_topics.html</loc></url>
 <url><loc>https://zilinskyjan.github.io/lloomr/reference/cluster_texts.html</loc></url>
 <url><loc>https://zilinskyjan.github.io/lloomr/reference/concept_matrix.html</loc></url>
+<url><loc>https://zilinskyjan.github.io/lloomr/reference/concept_similarity.html</loc></url>
 <url><loc>https://zilinskyjan.github.io/lloomr/reference/distill_filter.html</loc></url>
 <url><loc>https://zilinskyjan.github.io/lloomr/reference/distill_summarize.html</loc></url>
 <url><loc>https://zilinskyjan.github.io/lloomr/reference/examples_to_json.html</loc></url>
@@ -18,6 +19,7 @@
 <url><loc>https://zilinskyjan.github.io/lloomr/reference/ll_embed.html</loc></url>
 <url><loc>https://zilinskyjan.github.io/lloomr/reference/ll_query.html</loc></url>
 <url><loc>https://zilinskyjan.github.io/lloomr/reference/lloom_add_concept.html</loc></url>
+<url><loc>https://zilinskyjan.github.io/lloomr/reference/lloom_concept_map.html</loc></url>
 <url><loc>https://zilinskyjan.github.io/lloomr/reference/lloom_estimate_gen_cost.html</loc></url>
 <url><loc>https://zilinskyjan.github.io/lloomr/reference/lloom_estimate_score_cost.html</loc></url>
 <url><loc>https://zilinskyjan.github.io/lloomr/reference/lloom_export.html</loc></url>

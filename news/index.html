@@ -47,7 +47,8 @@
 </ul></div>
 <div class="section level3">
 <h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
-<ul><li>
+<ul><li>Concept proximity analysis: <code><a href="../reference/concept_similarity.html">concept_similarity()</a></code> computes pairwise concept similarity either semantically (embeddings of the concept definitions) or empirically (correlation of score vectors across documents), and <code><a href="../reference/lloom_concept_map.html">lloom_concept_map()</a></code> plots concepts in 2D so closely related concepts appear near each other (point size = prevalence).</li>
+<li>
 <code><a href="../reference/lloom_session.html">lloom_session()</a></code> gains a <code>chat</code> argument: one ellmer chat object (any provider) configures all three pipeline steps; step-specific arguments still override it.</li>
 <li>
 <code><a href="../reference/review_remove.html">review_remove()</a></code> refuses to remove <em>all</em> concepts at once (it keeps them and warns with guidance), so auto-review can no longer leave <code><a href="../reference/lloom_gen.html">lloom_gen()</a></code> with an empty concept set.</li>

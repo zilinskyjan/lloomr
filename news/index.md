@@ -11,6 +11,14 @@
 
 ### New features
 
+- Concept proximity analysis:
+  [`concept_similarity()`](https://zilinskyjan.github.io/lloomr/reference/concept_similarity.md)
+  computes pairwise concept similarity either semantically (embeddings
+  of the concept definitions) or empirically (correlation of score
+  vectors across documents), and
+  [`lloom_concept_map()`](https://zilinskyjan.github.io/lloomr/reference/lloom_concept_map.md)
+  plots concepts in 2D so closely related concepts appear near each
+  other (point size = prevalence).
 - [`lloom_session()`](https://zilinskyjan.github.io/lloomr/reference/lloom_session.md)
   gains a `chat` argument: one ellmer chat object (any provider)
   configures all three pipeline steps; step-specific arguments still

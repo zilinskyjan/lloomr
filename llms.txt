@@ -209,6 +209,10 @@ exclusive partition from a fixed topic set.
   : Build the concept x slice match matrix
 - [`lloom_export()`](https://zilinskyjan.github.io/lloomr/reference/lloom_export.md)
   : Export a per-concept results table
+- [`concept_similarity()`](https://zilinskyjan.github.io/lloomr/reference/concept_similarity.md)
+  : Pairwise similarity between concepts
+- [`lloom_concept_map()`](https://zilinskyjan.github.io/lloomr/reference/lloom_concept_map.md)
+  : Map concepts into 2D by their similarity
 
 ## LLM layer and prompts
 
