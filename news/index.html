@@ -46,12 +46,6 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="lloomr-development-version">lloomr (development version)<a class="anchor" aria-label="anchor" href="#lloomr-development-version"></a></h2>
 <div class="section level3">
-<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
-<ul><li>Printing a concept table after dplyr column subsetting (e.g. <code>sess$concepts |&gt; select(name)</code>) no longer warns about an unknown <code>active</code> column or falsely reports “0 active”. The <code>&lt;lloom_concepts&gt;</code> header is now shown only when the full concept structure is present.</li>
-<li>
-<code><a href="../reference/review_remove.html">review_remove()</a></code> refuses to remove <em>all</em> concepts at once (it keeps them and warns with guidance), so auto-review can no longer leave <code><a href="../reference/lloom_gen.html">lloom_gen()</a></code> with an empty concept set.</li>
-</ul></div>
-<div class="section level3">
 <h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
 <ul><li>Concept proximity analysis:
 <ul><li>
@@ -70,6 +64,12 @@
 <ul><li>
 <code>lloom_export(collapse = TRUE)</code> flattens list columns so the evidence table writes straight to CSV.</li>
 <li>Documentation: explicit saving guidance (<code>readr::write_csv(...)</code>) in the manual, vignette, and README; new vignette section on scoring a human-written codebook without running concept generation.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<ul><li>Printing a concept table after dplyr column subsetting (e.g. <code>sess$concepts |&gt; select(name)</code>) no longer warns about an unknown <code>active</code> column or falsely reports “0 active”. The <code>&lt;lloom_concepts&gt;</code> header is now shown only when the full concept structure is present.</li>
+<li>
+<code><a href="../reference/review_remove.html">review_remove()</a></code> refuses to remove <em>all</em> concepts at once (it keeps them and warns with guidance), so auto-review can no longer leave <code><a href="../reference/lloom_gen.html">lloom_gen()</a></code> with an empty concept set.</li>
 </ul></div>
 </div>
     <div class="section level2">
