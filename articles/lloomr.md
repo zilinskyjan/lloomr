@@ -61,6 +61,51 @@ Every step is also a standalone function on plain data frames
 [`synthesize_concepts()`](https://zilinskyjan.github.io/lloomr/reference/synthesize_concepts.md),
 …) — the session is a convenience, not a requirement.
 
+## Choosing your LLM (provider and models)
+
+The model decision is made **when you create the session** (or, for
+standalone operators, via their `chat` argument) —
+[`lloom_gen()`](https://zilinskyjan.github.io/lloomr/reference/lloom_gen.md)
+and
+[`lloom_score()`](https://zilinskyjan.github.io/lloomr/reference/lloom_score.md)
+deliberately take no model argument; they use what the session holds.
+You choose the provider by choosing the ellmer constructor:
+
+``` r
+
+# One model for everything — OpenAI, Anthropic, Gemini, or local:
+sess <- lloom_session(df, "text", "doc_id",
+  chat = ellmer::chat_openai(model = "gpt-5.2", echo = "none"))
+
+sess <- lloom_session(df, "text", "doc_id",
+  chat = ellmer::chat_anthropic(model = "claude-sonnet-4-6", echo = "none"))
+
+sess <- lloom_session(df, "text", "doc_id",
+  chat = ellmer::chat_ollama(model = "llama3.3", echo = "none"))  # local
+
+# Or mix per step — cheap for high-volume distill/score, capable for
+# synthesis (this mirrors the package defaults):
+sess <- lloom_session(df, "text", "doc_id",
+  distill_chat = ellmer::chat_openai(model = "gpt-5.4-nano", echo = "none"),
+  synth_chat   = ellmer::chat_openai(model = "gpt-5.2", echo = "none"),
+  score_chat   = ellmer::chat_openai(model = "gpt-5.4-nano", echo = "none"))
+```
+
+If you pass nothing, the defaults are gpt-5.4-nano (distill, score) and
+gpt-5.2 (synthesis), which require `OPENAI_API_KEY`.
+
+One caveat: **clustering uses OpenAI embeddings by default** regardless
+of your chat provider (some providers, like Anthropic, have no
+embeddings API). To go fully non-OpenAI, supply your own embedding
+function:
+
+``` r
+
+sess <- lloom_session(df, "text", "doc_id",
+  chat = ellmer::chat_anthropic(model = "claude-sonnet-4-6", echo = "none"),
+  embed_fn = function(texts) my_embedding_matrix(texts))  # any fn: texts -> matrix
+```
+
 ## Bring your own concepts (scoring a human codebook)
 
 Concept *generation* is optional. If you already have a codebook —

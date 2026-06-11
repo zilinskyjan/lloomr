@@ -59,6 +59,7 @@ idiom is <code>sess &lt;- lloom_gen(sess, ...)</code>.</p>
 <span>  <span class="va">df</span>,</span>
 <span>  <span class="va">text_col</span>,</span>
 <span>  id_col <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  chat <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  distill_chat <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  synth_chat <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  score_chat <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -84,13 +85,24 @@ idiom is <code>sess &lt;- lloom_gen(sess, ...)</code>.</p>
 of row numbers is created (with a message). IDs must be unique.</p></dd>
 
 
+<dt id="arg-chat">chat<a class="anchor" aria-label="anchor" href="#arg-chat"></a></dt>
+<dd><p>Optional: a single ellmer chat object to use for <strong>all</strong>
+LLM steps. This is where the model and provider are chosen — any
+ellmer provider works (<code><a href="https://ellmer.tidyverse.org/reference/chat_openai.html" class="external-link">ellmer::chat_openai()</a></code>,
+<code><a href="https://ellmer.tidyverse.org/reference/chat_anthropic.html" class="external-link">ellmer::chat_anthropic()</a></code>, <code><a href="https://ellmer.tidyverse.org/reference/chat_google_gemini.html" class="external-link">ellmer::chat_google_gemini()</a></code>,
+<code><a href="https://ellmer.tidyverse.org/reference/chat_ollama.html" class="external-link">ellmer::chat_ollama()</a></code>, ...). Overridden by the step-specific
+arguments below.</p></dd>
+
+
 <dt id="arg-distill-chat-synth-chat-score-chat">distill_chat, synth_chat, score_chat<a class="anchor" aria-label="anchor" href="#arg-distill-chat-synth-chat-score-chat"></a></dt>
 <dd><p>ellmer chat objects for the
-distill, synthesize/review, and score steps. Defaults: gpt-5.4-nano
-for the cheap high-volume steps (distill, score) and gpt-5.2 for
-concept synthesis (requires <code>OPENAI_API_KEY</code> if any default is used).
-Upstream's defaults were gpt-4o-mini / gpt-4o; lloomr tracks newer
-models (deviation D10 in the comparison document).</p></dd>
+distill, synthesize/review, and score steps individually (a common
+pattern: a cheap model for the high-volume distill/score steps, a
+capable one for synthesis). Defaults when neither these nor <code>chat</code>
+are given: gpt-5.4-nano for distill/score and gpt-5.2 for synthesis
+(requires <code>OPENAI_API_KEY</code>). Upstream's defaults were gpt-4o-mini /
+gpt-4o; lloomr tracks newer models (deviation D10 in the comparison
+document).</p></dd>
 
 
 <dt id="arg-embed-fn">embed_fn<a class="anchor" aria-label="anchor" href="#arg-embed-fn"></a></dt>
@@ -106,13 +118,27 @@ Default: <code><a href="ll_embed.html">ll_embed()</a></code> with <code>embed_mo
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object of class <code>lloom_session</code>.</p>
     </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Note on embeddings: clustering uses OpenAI embeddings by default
+regardless of the chat provider (Anthropic, for example, has no
+embeddings API). To use another embedding provider — or precomputed
+embeddings — supply <code>embed_fn</code>.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># Default models (OpenAI):</span></span></span>
 <span class="r-in"><span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu">lloom_session</span><span class="op">(</span><span class="va">df</span>, text_col <span class="op">=</span> <span class="st">"text"</span>, id_col <span class="op">=</span> <span class="st">"doc_id"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Or with explicit models per step:</span></span></span>
+<span class="r-in"><span><span class="co"># One model of your choice for every step — this is where you pick</span></span></span>
+<span class="r-in"><span><span class="co"># the LLM (any ellmer provider):</span></span></span>
+<span class="r-in"><span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu">lloom_session</span><span class="op">(</span><span class="va">df</span>, <span class="st">"text"</span>, <span class="st">"doc_id"</span>,</span></span>
+<span class="r-in"><span>  chat <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_anthropic.html" class="external-link">chat_anthropic</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"claude-haiku-4-5"</span>, echo <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Or per step (cheap model for high-volume steps, capable for synthesis):</span></span></span>
 <span class="r-in"><span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu">lloom_session</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">df</span>, <span class="st">"text"</span>, <span class="st">"doc_id"</span>,</span></span>
 <span class="r-in"><span>  distill_chat <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_openai.html" class="external-link">chat_openai</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"gpt-5.4-nano"</span>, echo <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span>,</span></span>

@@ -73,12 +73,15 @@
 <span></span>
 <span><span class="co"># Alternative: </span></span>
 <span><span class="co"># remotes::install_github("zilinskyjan/lloomr")</span></span></code></pre></div>
-<p>Set <code>OPENAI_API_KEY</code> in <code>~/.Renviron</code> (or supply any ellmer chat objects).</p>
+<p>Set <code>OPENAI_API_KEY</code> in <code>~/.Renviron</code> for the default models — or pick any provider yourself; the model choice is just an ellmer chat object:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/lloom_session.html">lloom_session</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"text"</span>, <span class="st">"doc_id"</span>,</span>
+<span>  chat <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_anthropic.html" class="external-link">chat_anthropic</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"claude-sonnet-4-6"</span>, echo <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/zilinskyjan/lloomr" class="external-link">lloomr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/lloom_session.html">lloom_session</a></span><span class="op">(</span><span class="va">df</span>, text_col <span class="op">=</span> <span class="st">"text"</span>, id_col <span class="op">=</span> <span class="st">"doc_id"</span><span class="op">)</span></span>
@@ -95,7 +98,7 @@
 <p>Every pipeline step is also a standalone function on plain data frames (<code><a href="reference/distill_summarize.html">distill_summarize()</a></code>, <code><a href="reference/cluster_texts.html">cluster_texts()</a></code>, <code><a href="reference/synthesize_concepts.html">synthesize_concepts()</a></code>, <code><a href="reference/review_concepts.html">review_concepts()</a></code>, <code><a href="reference/score_concepts.html">score_concepts()</a></code>, …).</p>
 <p>Beyond the Python original, lloomr adds <strong>single-label classification</strong> into a fixed topic set: <code><a href="reference/assign_topics.html">assign_topics()</a></code> (forced-choice, schema- constrained) and <code><a href="reference/slot_by_score.html">slot_by_score()</a></code> (free argmax over existing scores).</p>
 <p><strong>Concept generation is optional.</strong> To score a human-written codebook, skip generation entirely:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">codebook</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/new_concepts.html">new_concepts</a></span><span class="op">(</span></span>
 <span>  name   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Economic Anxiety"</span>, <span class="st">"Media Distrust"</span><span class="op">)</span>,</span>
 <span>  prompt <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Does the text express concern about economic conditions?"</span>,</span>

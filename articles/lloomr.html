@@ -132,6 +132,43 @@ APIs); they show the canonical workflow. With an
 not a requirement.</p>
 </div>
 <div class="section level2">
+<h2 id="choosing-your-llm-provider-and-models">Choosing your LLM (provider and models)<a class="anchor" aria-label="anchor" href="#choosing-your-llm-provider-and-models"></a>
+</h2>
+<p>The model decision is made <strong>when you create the
+session</strong> (or, for standalone operators, via their
+<code>chat</code> argument) — <code><a href="../reference/lloom_gen.html">lloom_gen()</a></code> and
+<code><a href="../reference/lloom_score.html">lloom_score()</a></code> deliberately take no model argument; they use
+what the session holds. You choose the provider by choosing the ellmer
+constructor:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># One model for everything — OpenAI, Anthropic, Gemini, or local:</span></span>
+<span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lloom_session.html">lloom_session</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"text"</span>, <span class="st">"doc_id"</span>,</span>
+<span>  chat <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_openai.html" class="external-link">chat_openai</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"gpt-5.2"</span>, echo <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lloom_session.html">lloom_session</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"text"</span>, <span class="st">"doc_id"</span>,</span>
+<span>  chat <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_anthropic.html" class="external-link">chat_anthropic</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"claude-sonnet-4-6"</span>, echo <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lloom_session.html">lloom_session</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"text"</span>, <span class="st">"doc_id"</span>,</span>
+<span>  chat <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_ollama.html" class="external-link">chat_ollama</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"llama3.3"</span>, echo <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span>  <span class="co"># local</span></span>
+<span></span>
+<span><span class="co"># Or mix per step — cheap for high-volume distill/score, capable for</span></span>
+<span><span class="co"># synthesis (this mirrors the package defaults):</span></span>
+<span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lloom_session.html">lloom_session</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"text"</span>, <span class="st">"doc_id"</span>,</span>
+<span>  distill_chat <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_openai.html" class="external-link">chat_openai</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"gpt-5.4-nano"</span>, echo <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  synth_chat   <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_openai.html" class="external-link">chat_openai</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"gpt-5.2"</span>, echo <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  score_chat   <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_openai.html" class="external-link">chat_openai</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"gpt-5.4-nano"</span>, echo <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>If you pass nothing, the defaults are gpt-5.4-nano (distill, score)
+and gpt-5.2 (synthesis), which require <code>OPENAI_API_KEY</code>.</p>
+<p>One caveat: <strong>clustering uses OpenAI embeddings by
+default</strong> regardless of your chat provider (some providers, like
+Anthropic, have no embeddings API). To go fully non-OpenAI, supply your
+own embedding function:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lloom_session.html">lloom_session</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"text"</span>, <span class="st">"doc_id"</span>,</span>
+<span>  chat <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_anthropic.html" class="external-link">chat_anthropic</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"claude-sonnet-4-6"</span>, echo <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  embed_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">texts</span><span class="op">)</span> <span class="fu">my_embedding_matrix</span><span class="op">(</span><span class="va">texts</span><span class="op">)</span><span class="op">)</span>  <span class="co"># any fn: texts -&gt; matrix</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="bring-your-own-concepts-scoring-a-human-codebook">Bring your own concepts (scoring a human codebook)<a class="anchor" aria-label="anchor" href="#bring-your-own-concepts-scoring-a-human-codebook"></a>
 </h2>
 <p>Concept <em>generation</em> is optional. If you already have a
@@ -140,7 +177,7 @@ hand-edited output of an earlier run — you can use lloomr purely
 <strong>deductively</strong>: write the concepts yourself and score
 every document against them. Each concept just needs a name and a yes/no
 inclusion-criterion question:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">codebook</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/new_concepts.html">new_concepts</a></span><span class="op">(</span></span>
 <span>  name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Economic Anxiety"</span>, <span class="st">"Media Distrust"</span><span class="op">)</span>,</span>
 <span>  prompt <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -155,7 +192,7 @@ inclusion-criterion question:</p>
 <span>                           get_highlights <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>The same works inside a session — skip <code><a href="../reference/lloom_gen.html">lloom_gen()</a></code>
 entirely and add concepts by hand:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lloom_session.html">lloom_session</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"text"</span>, <span class="st">"doc_id"</span><span class="op">)</span></span>
 <span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lloom_add_concept.html">lloom_add_concept</a></span><span class="op">(</span><span class="va">sess</span>, <span class="st">"Economic Anxiety"</span>,</span>
 <span>                          <span class="st">"Does the text express concern about economic conditions?"</span><span class="op">)</span></span>
@@ -173,7 +210,7 @@ all.</p>
 pair is rated independently, so a document can match several concepts or
 none. When a mutually exclusive partition is needed, freeze a topic set
 and use one of:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Forced-choice LLM classification (labels constrained to your topic set)</span></span>
 <span><span class="va">assignments</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/assign_topics.html">assign_topics</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"text"</span>, <span class="st">"doc_id"</span>, <span class="va">sess</span><span class="op">$</span><span class="va">concepts</span>, <span class="va">chat</span><span class="op">)</span></span>
 <span></span>
@@ -187,7 +224,7 @@ and use one of:</p>
 for the Python package’s interactive matrix widget). It needs only a
 scored session, so we demonstrate with a small synthetic one — no API
 calls:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">docs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  doc_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span>,</span>
 <span>  text <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"document"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span>,</span>
@@ -217,7 +254,7 @@ calls:</p>
 <span>                      score_chat <span class="op">=</span> <span class="st">"unused"</span><span class="op">)</span></span>
 <span><span class="va">sess</span><span class="op">$</span><span class="va">concepts</span> <span class="op">&lt;-</span> <span class="va">concepts</span></span>
 <span><span class="va">sess</span><span class="op">$</span><span class="va">score_df</span> <span class="op">&lt;-</span> <span class="va">score_df</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/lloom_vis.html">lloom_vis</a></span><span class="op">(</span><span class="va">sess</span>, slice_col <span class="op">=</span> <span class="st">"party"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="lloomr_files/figure-html/vis-demo-1.png" class="r-plt" alt="" width="624"></p>
 <p>The underlying tidy matrix is available via [concept_matrix()] for
@@ -229,7 +266,7 @@ custom plots, and [lloom_export()] produces a per-concept evidence table
 </h2>
 <p>The score table is a <strong>plain data frame</strong> — one row per
 (document, concept) pair — so saving it is one ordinary line:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">readr</span><span class="fu">::</span><span class="fu">write_csv</span><span class="op">(</span><span class="fu"><a href="../reference/lloom_results.html">lloom_results</a></span><span class="op">(</span><span class="va">sess</span><span class="op">)</span>, <span class="st">"scores.csv"</span><span class="op">)</span></span></code></pre></div>
 <p>That CSV has everything: document IDs, concept names, scores, the
 model’s rationales, and highlight quotes.</p>
@@ -238,7 +275,7 @@ model’s rationales, and highlight quotes.</p>
 dataset. [scores_wide()] does the pivot and sanitizes concept names into
 valid column names (continuing with the synthetic scores from
 above):</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wide</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scores_wide.html">scores_wide</a></span><span class="op">(</span><span class="va">score_df</span>, <span class="st">"doc_id"</span><span class="op">)</span></span>
 <span><span class="va">wide</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 3</span></span></span>
@@ -259,7 +296,7 @@ above):</p>
 <span><span class="co">#&gt;    "Media.Distrust" "Vaccine.Promotion"</span></span></code></pre></div>
 <p>Joining the scores back onto your data is then a regular merge — with
 the row-count checks that any merge deserves:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">wide</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">docs</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">merged</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">docs</span>, <span class="va">wide</span>, by <span class="op">=</span> <span class="st">"doc_id"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">merged</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">docs</span><span class="op">)</span><span class="op">)</span></span>
@@ -269,7 +306,7 @@ the row-count checks that any merge deserves:</p>
 <span><span class="co">#&gt; 2      2 document 2     D              1                 1</span></span>
 <span><span class="co">#&gt; 3      3 document 3     D              0                 1</span></span></code></pre></div>
 <p>Finally, two one-liners for whole-analysis persistence:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Everything at once: scores (long + wide), concepts, evidence table,</span></span>
 <span><span class="co"># and the full session object</span></span>
 <span><span class="fu"><a href="../reference/lloom_write.html">lloom_write</a></span><span class="op">(</span><span class="va">sess</span>, <span class="st">"results/"</span><span class="op">)</span></span>
