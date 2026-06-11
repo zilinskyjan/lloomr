@@ -37,6 +37,17 @@ review_remove <- function(concepts, chat, seed = NULL, max_active = 10, rpm = 50
   res <- ll_query(chat, prompt, lloom_type(step), max_active = max_active, rpm = rpm)[[1]]
 
   to_remove <- intersect(unique(as.character(unlist(res$remove))), concepts$name)
+
+  # Guard: never let review wipe out the whole concept set
+  if (length(to_remove) > 0 && length(to_remove) >= nrow(concepts)) {
+    cli::cli_warn(c(
+      "Review proposed removing all {nrow(concepts)} concepts; keeping all of them instead.",
+      "i" = "This usually means the generated concepts are uniformly narrow (or uniformly broad).",
+      "i" = "Consider steering generation with {.arg seed}, requesting fewer concepts per cluster ({.arg n_concepts}), or skipping auto-review ({.code lloom_gen(..., auto_review = FALSE)}) and selecting manually."
+    ))
+    to_remove <- character(0)
+  }
+
   list(
     concepts = concepts[!concepts$name %in% to_remove, , drop = FALSE],
     removed = to_remove

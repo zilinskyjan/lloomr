@@ -35,6 +35,24 @@ test_that("review_remove keeps everything when the query fails or list is empty"
   expect_equal(nrow(res2$concepts), 4)
 })
 
+test_that("review_remove refuses to wipe out the entire concept set", {
+  cc <- concepts_fixture()
+  # The LLM proposes removing every concept (e.g., all judged too narrow)
+  local_mocked_bindings(
+    ll_query = mock_review_response(list(remove = as.list(cc$name)))
+  )
+  expect_warning(res <- review_remove(cc, chat = "fake"), "keeping all")
+  expect_equal(nrow(res$concepts), 4)   # nothing actually removed
+  expect_length(res$removed, 0)
+
+  # Removing all but one is still allowed
+  local_mocked_bindings(
+    ll_query = mock_review_response(list(remove = as.list(cc$name[1:3])))
+  )
+  res2 <- review_remove(cc, chat = "fake")
+  expect_equal(nrow(res2$concepts), 1)
+})
+
 test_that("review_remove uses the seeded prompt variant when seed is given", {
   cc <- concepts_fixture()
   local_mocked_bindings(
