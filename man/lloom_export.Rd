@@ -4,7 +4,7 @@
 \alias{lloom_export}
 \title{Export a per-concept results table}
 \usage{
-lloom_export(sess, threshold = 1, max_highlights = 3)
+lloom_export(sess, threshold = 1, max_highlights = 3, collapse = FALSE)
 }
 \arguments{
 \item{sess}{A \code{\link[=lloom_session]{lloom_session()}} after \code{\link[=lloom_score]{lloom_score()}}.}
@@ -13,6 +13,10 @@ lloom_export(sess, threshold = 1, max_highlights = 3)
 
 \item{max_highlights}{Maximum highlight quotes kept per concept.
 Default 3 (as upstream).}
+
+\item{collapse}{If \code{TRUE}, collapse the \code{rep_examples} and \code{highlights}
+list columns into single \code{" | "}-separated strings, so the table can
+be written straight to CSV. Default \code{FALSE}.}
 }
 \value{
 A tibble: \code{concept}, \code{criteria}, \code{summary}, \code{rep_examples}
@@ -26,5 +30,8 @@ One row per active concept with its criteria, prevalence, and evidence
 \examples{
 \dontrun{
 lloom_export(sess)  # after lloom_gen() and lloom_score()
+
+# CSV-safe version (list columns collapsed to text):
+readr::write_csv(lloom_export(sess, collapse = TRUE), "concept_summary.csv")
 }
 }

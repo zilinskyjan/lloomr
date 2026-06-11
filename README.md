@@ -24,6 +24,9 @@ parsed out of free text.
 ```r
 # install.packages("pak")
 pak::pak("zilinskyjan/lloomr")
+
+# Alternative: 
+# remotes::install_github("zilinskyjan/lloomr")
 ```
 
 Set `OPENAI_API_KEY` in `~/.Renviron` (or supply any ellmer chat objects).
@@ -40,6 +43,10 @@ sess <- lloom_score(sess)                      # score all documents
 lloom_results(sess)                            # tidy (doc × concept) scores
 lloom_vis(sess, slice_col = "party")           # heatmap by group
 summary(sess)                                  # time, tokens, dollars
+
+# Save your results — the score table is a plain data frame:
+readr::write_csv(lloom_results(sess), "scores.csv")
+lloom_write(sess, "results/")                  # or: everything in one call
 ```
 
 Every pipeline step is also a standalone function on plain data frames

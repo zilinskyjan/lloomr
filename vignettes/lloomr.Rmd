@@ -91,7 +91,7 @@ slotted <- slot_by_score(score_df, "doc_id", threshold = 1)
 the Python package's interactive matrix widget). It needs only a scored
 session, so we demonstrate with a small synthetic one — no API calls:
 
-```{r vis-demo, fig.width = 6.5, fig.height = 3, eval = requireNamespace("ggplot2", quietly = TRUE)}
+```{r vis-data}
 docs <- data.frame(
   doc_id = as.character(1:8),
   text = paste("document", 1:8),
@@ -121,13 +121,62 @@ sess <- lloom_session(docs, "text", "doc_id",
                       score_chat = "unused")
 sess$concepts <- concepts
 sess$score_df <- score_df
+```
 
+```{r vis-demo, fig.width = 6.5, fig.height = 3, eval = requireNamespace("ggplot2", quietly = TRUE)}
 lloom_vis(sess, slice_col = "party")
 ```
 
 The underlying tidy matrix is available via [concept_matrix()] for custom
 plots, and [lloom_export()] produces a per-concept evidence table
 (criteria, prevalence, highlight quotes).
+
+## Saving your results
+
+The score table is a **plain data frame** — one row per (document,
+concept) pair — so saving it is one ordinary line:
+
+```{r save-csv, eval = FALSE}
+readr::write_csv(lloom_results(sess), "scores.csv")
+```
+
+That CSV has everything: document IDs, concept names, scores, the model's
+rationales, and highlight quotes.
+
+For analysis you usually also want the **wide** version — one row per
+document, one column per concept — to join onto your main dataset.
+[scores_wide()] does the pivot and sanitizes concept names into valid
+column names (continuing with the synthetic scores from above):
+
+```{r save-wide}
+wide <- scores_wide(score_df, "doc_id")
+wide
+
+# The mapping from concept names to column names:
+attr(wide, "concept_names")
+```
+
+Joining the scores back onto your data is then a regular merge — with the
+row-count checks that any merge deserves:
+
+```{r save-join}
+stopifnot(nrow(wide) == nrow(docs))
+merged <- dplyr::left_join(docs, wide, by = "doc_id")
+stopifnot(nrow(merged) == nrow(docs))
+head(merged, 3)
+```
+
+Finally, two one-liners for whole-analysis persistence:
+
+```{r save-all, eval = FALSE}
+# Everything at once: scores (long + wide), concepts, evidence table,
+# and the full session object
+lloom_write(sess, "results/")
+
+# Or just the session; chat objects survive and keep working after reload
+saveRDS(sess, "results/session.rds")
+sess <- readRDS("results/session.rds")   # later, in a fresh R session
+```
 
 ## Further reading
 

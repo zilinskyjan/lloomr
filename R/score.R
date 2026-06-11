@@ -44,6 +44,9 @@
 #'                            get_highlights = TRUE)
 #' # Prevalence: fraction of documents matching each concept
 #' aggregate(score >= 1 ~ concept_name, data = score_df, FUN = mean)
+#'
+#' # The result is a plain tibble; save it like any data frame:
+#' readr::write_csv(score_df, "scores.csv")
 #' }
 score_concepts <- function(df,
                            text_col,

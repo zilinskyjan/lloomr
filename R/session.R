@@ -310,6 +310,9 @@ lloom_gen <- function(sess,
 #' \dontrun{
 #' sess <- lloom_score(sess)                  # active concepts, full data
 #' sess <- lloom_score(sess, score_all = TRUE)  # every generated concept
+#'
+#' # Save the resulting scores:
+#' readr::write_csv(lloom_results(sess), "scores.csv")
 #' }
 lloom_score <- function(sess,
                         batch_size = 1,
@@ -394,12 +397,25 @@ lloom_add_concept <- function(sess, name, prompt, active = TRUE) {
 
 #' Get the score results from a session
 #'
+#' Returns the long score table: one row per (document, concept) pair with
+#' the document ID, concept name, score, rationale, and highlight. It is a
+#' plain tibble, so saving it is one line — see the examples. For one row
+#' per document (to join onto your main dataset), reshape with
+#' [scores_wide()]; to save everything a finished analysis produced in one
+#' call, use [lloom_write()].
+#'
 #' @param sess A [lloom_session()] after [lloom_score()].
 #' @return The long score tibble (see [score_concepts()]).
 #' @export
 #' @examples
 #' \dontrun{
 #' score_df <- lloom_results(sess)
+#'
+#' # Save the scores as a CSV (document IDs, concepts, scores, rationales):
+#' readr::write_csv(score_df, "scores.csv")
+#'
+#' # Or one row per document, one column per concept:
+#' readr::write_csv(scores_wide(score_df, "doc_id"), "scores_wide.csv")
 #' }
 lloom_results <- function(sess) {
   stopifnot(inherits(sess, "lloom_session"))

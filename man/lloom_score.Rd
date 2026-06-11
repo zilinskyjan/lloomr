@@ -39,5 +39,8 @@ concepts only, against the full dataset (or \code{df}).
 \dontrun{
 sess <- lloom_score(sess)                  # active concepts, full data
 sess <- lloom_score(sess, score_all = TRUE)  # every generated concept
+
+# Save the resulting scores:
+readr::write_csv(lloom_results(sess), "scores.csv")
 }
 }

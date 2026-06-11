@@ -194,6 +194,9 @@ lloom_vis <- function(sess,
 #' @param threshold Minimum score counting as a match. Default 1.
 #' @param max_highlights Maximum highlight quotes kept per concept.
 #'   Default 3 (as upstream).
+#' @param collapse If `TRUE`, collapse the `rep_examples` and `highlights`
+#'   list columns into single `" | "`-separated strings, so the table can
+#'   be written straight to CSV. Default `FALSE`.
 #' @return A tibble: `concept`, `criteria`, `summary`, `rep_examples`
 #'   (list column: the concept's exemplar documents), `prevalence`,
 #'   `n_matches`, `highlights` (list column).
@@ -201,8 +204,11 @@ lloom_vis <- function(sess,
 #' @examples
 #' \dontrun{
 #' lloom_export(sess)  # after lloom_gen() and lloom_score()
+#'
+#' # CSV-safe version (list columns collapsed to text):
+#' readr::write_csv(lloom_export(sess, collapse = TRUE), "concept_summary.csv")
 #' }
-lloom_export <- function(sess, threshold = 1, max_highlights = 3) {
+lloom_export <- function(sess, threshold = 1, max_highlights = 3, collapse = FALSE) {
   stopifnot(inherits(sess, "lloom_session"))
   if (is.null(sess$score_df)) {
     cli::cli_abort("No scores in session. Run {.fn lloom_score} first.")
@@ -234,5 +240,10 @@ lloom_export <- function(sess, threshold = 1, max_highlights = 3) {
       highlights = list(highlights)
     )
   })
-  dplyr::bind_rows(rows)
+  out <- dplyr::bind_rows(rows)
+  if (collapse) {
+    out$rep_examples <- vapply(out$rep_examples, paste, character(1), collapse = " | ")
+    out$highlights <- vapply(out$highlights, paste, character(1), collapse = " | ")
+  }
+  out
 }
