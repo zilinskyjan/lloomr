@@ -45,6 +45,19 @@ test_that("lloom_session preprocesses input and validates IDs", {
   )
 })
 
+test_that("lloom_session chat argument sets all steps, specific args win", {
+  sess <- lloom_session(session_df(), "text", "post_id", chat = "one-chat")
+  expect_equal(sess$distill_chat, "one-chat")
+  expect_equal(sess$synth_chat, "one-chat")
+  expect_equal(sess$score_chat, "one-chat")
+
+  sess2 <- lloom_session(session_df(), "text", "post_id",
+                         chat = "one-chat", synth_chat = "big-chat")
+  expect_equal(sess2$distill_chat, "one-chat")
+  expect_equal(sess2$synth_chat, "big-chat")  # specific override wins
+  expect_equal(sess2$score_chat, "one-chat")
+})
+
 test_that("count_sentences and lloom_suggest_params follow upstream heuristics", {
   cs <- lloomr:::count_sentences
   expect_equal(cs("One. Two! Three?"), 3L)

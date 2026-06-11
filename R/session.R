@@ -24,12 +24,26 @@
 #' @param text_col Name of the text column.
 #' @param id_col Name of the document ID column; if `NULL`, an `id` column
 #'   of row numbers is created (with a message). IDs must be unique.
+#' @param chat Optional: a single ellmer chat object to use for **all**
+#'   LLM steps. This is where the model and provider are chosen — any
+#'   ellmer provider works ([ellmer::chat_openai()],
+#'   [ellmer::chat_anthropic()], [ellmer::chat_google_gemini()],
+#'   [ellmer::chat_ollama()], ...). Overridden by the step-specific
+#'   arguments below.
 #' @param distill_chat,synth_chat,score_chat ellmer chat objects for the
-#'   distill, synthesize/review, and score steps. Defaults: gpt-5.4-nano
-#'   for the cheap high-volume steps (distill, score) and gpt-5.2 for
-#'   concept synthesis (requires `OPENAI_API_KEY` if any default is used).
-#'   Upstream's defaults were gpt-4o-mini / gpt-4o; lloomr tracks newer
-#'   models (deviation D10 in the comparison document).
+#'   distill, synthesize/review, and score steps individually (a common
+#'   pattern: a cheap model for the high-volume distill/score steps, a
+#'   capable one for synthesis). Defaults when neither these nor `chat`
+#'   are given: gpt-5.4-nano for distill/score and gpt-5.2 for synthesis
+#'   (requires `OPENAI_API_KEY`). Upstream's defaults were gpt-4o-mini /
+#'   gpt-4o; lloomr tracks newer models (deviation D10 in the comparison
+#'   document).
+#'
+#' @details
+#' Note on embeddings: clustering uses OpenAI embeddings by default
+#' regardless of the chat provider (Anthropic, for example, has no
+#' embeddings API). To use another embedding provider — or precomputed
+#' embeddings — supply `embed_fn`.
 #' @param embed_fn Embedding function for clustering (see [cluster_texts()]).
 #'   Default: [ll_embed()] with `embed_model`.
 #' @param embed_model Embedding model for the default `embed_fn`.
@@ -37,9 +51,16 @@
 #' @export
 #' @examples
 #' \dontrun{
+#' # Default models (OpenAI):
 #' sess <- lloom_session(df, text_col = "text", id_col = "doc_id")
 #'
-#' # Or with explicit models per step:
+#' # One model of your choice for every step — this is where you pick
+#' # the LLM (any ellmer provider):
+#' sess <- lloom_session(df, "text", "doc_id",
+#'   chat = ellmer::chat_anthropic(model = "claude-haiku-4-5", echo = "none")
+#' )
+#'
+#' # Or per step (cheap model for high-volume steps, capable for synthesis):
 #' sess <- lloom_session(
 #'   df, "text", "doc_id",
 #'   distill_chat = ellmer::chat_openai(model = "gpt-5.4-nano", echo = "none"),
@@ -50,6 +71,7 @@
 lloom_session <- function(df,
                           text_col,
                           id_col = NULL,
+                          chat = NULL,
                           distill_chat = NULL,
                           synth_chat = NULL,
                           score_chat = NULL,
@@ -79,9 +101,12 @@ lloom_session <- function(df,
     df = tibble::as_tibble(df),
     text_col = text_col,
     id_col = id_col,
-    distill_chat = distill_chat %||% ellmer::chat_openai(model = "gpt-5.4-nano", echo = "none"),
-    synth_chat = synth_chat %||% ellmer::chat_openai(model = "gpt-5.2", echo = "none"),
-    score_chat = score_chat %||% ellmer::chat_openai(model = "gpt-5.4-nano", echo = "none"),
+    distill_chat = distill_chat %||% chat %||%
+      ellmer::chat_openai(model = "gpt-5.4-nano", echo = "none"),
+    synth_chat = synth_chat %||% chat %||%
+      ellmer::chat_openai(model = "gpt-5.2", echo = "none"),
+    score_chat = score_chat %||% chat %||%
+      ellmer::chat_openai(model = "gpt-5.4-nano", echo = "none"),
     embed_fn = embed_fn %||% function(t) ll_embed(t, model = embed_model),
     params = NULL,
     df_filtered = NULL,

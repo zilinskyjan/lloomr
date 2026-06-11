@@ -29,7 +29,13 @@ pak::pak("zilinskyjan/lloomr")
 # remotes::install_github("zilinskyjan/lloomr")
 ```
 
-Set `OPENAI_API_KEY` in `~/.Renviron` (or supply any ellmer chat objects).
+Set `OPENAI_API_KEY` in `~/.Renviron` for the default models — or pick
+any provider yourself; the model choice is just an ellmer chat object:
+
+```r
+sess <- lloom_session(df, "text", "doc_id",
+  chat = ellmer::chat_anthropic(model = "claude-sonnet-4-6", echo = "none"))
+```
 
 ## Quick start
 

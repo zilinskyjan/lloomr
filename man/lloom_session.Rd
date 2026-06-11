@@ -8,6 +8,7 @@ lloom_session(
   df,
   text_col,
   id_col = NULL,
+  chat = NULL,
   distill_chat = NULL,
   synth_chat = NULL,
   score_chat = NULL,
@@ -23,12 +24,21 @@ lloom_session(
 \item{id_col}{Name of the document ID column; if \code{NULL}, an \code{id} column
 of row numbers is created (with a message). IDs must be unique.}
 
+\item{chat}{Optional: a single ellmer chat object to use for \strong{all}
+LLM steps. This is where the model and provider are chosen — any
+ellmer provider works (\code{\link[ellmer:chat_openai]{ellmer::chat_openai()}},
+\code{\link[ellmer:chat_anthropic]{ellmer::chat_anthropic()}}, \code{\link[ellmer:chat_google_gemini]{ellmer::chat_google_gemini()}},
+\code{\link[ellmer:chat_ollama]{ellmer::chat_ollama()}}, ...). Overridden by the step-specific
+arguments below.}
+
 \item{distill_chat, synth_chat, score_chat}{ellmer chat objects for the
-distill, synthesize/review, and score steps. Defaults: gpt-5.4-nano
-for the cheap high-volume steps (distill, score) and gpt-5.2 for
-concept synthesis (requires \code{OPENAI_API_KEY} if any default is used).
-Upstream's defaults were gpt-4o-mini / gpt-4o; lloomr tracks newer
-models (deviation D10 in the comparison document).}
+distill, synthesize/review, and score steps individually (a common
+pattern: a cheap model for the high-volume distill/score steps, a
+capable one for synthesis). Defaults when neither these nor \code{chat}
+are given: gpt-5.4-nano for distill/score and gpt-5.2 for synthesis
+(requires \code{OPENAI_API_KEY}). Upstream's defaults were gpt-4o-mini /
+gpt-4o; lloomr tracks newer models (deviation D10 in the comparison
+document).}
 
 \item{embed_fn}{Embedding function for clustering (see \code{\link[=cluster_texts]{cluster_texts()}}).
 Default: \code{\link[=ll_embed]{ll_embed()}} with \code{embed_model}.}
@@ -44,11 +54,24 @@ pipeline runs) all intermediate and final results. Step functions
 (\code{\link[=lloom_gen]{lloom_gen()}}, \code{\link[=lloom_score]{lloom_score()}}) take and return the session, so the
 idiom is \code{sess <- lloom_gen(sess, ...)}.
 }
+\details{
+Note on embeddings: clustering uses OpenAI embeddings by default
+regardless of the chat provider (Anthropic, for example, has no
+embeddings API). To use another embedding provider — or precomputed
+embeddings — supply \code{embed_fn}.
+}
 \examples{
 \dontrun{
+# Default models (OpenAI):
 sess <- lloom_session(df, text_col = "text", id_col = "doc_id")
 
-# Or with explicit models per step:
+# One model of your choice for every step — this is where you pick
+# the LLM (any ellmer provider):
+sess <- lloom_session(df, "text", "doc_id",
+  chat = ellmer::chat_anthropic(model = "claude-haiku-4-5", echo = "none")
+)
+
+# Or per step (cheap model for high-volume steps, capable for synthesis):
 sess <- lloom_session(
   df, "text", "doc_id",
   distill_chat = ellmer::chat_openai(model = "gpt-5.4-nano", echo = "none"),
