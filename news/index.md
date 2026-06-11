@@ -12,17 +12,20 @@
 ### New features
 
 - Concept proximity analysis:
-  [`concept_similarity()`](https://zilinskyjan.github.io/lloomr/reference/concept_similarity.md)
-  computes pairwise concept similarity three ways — semantically
-  (embeddings of the concept definitions), empirically (correlation of
-  score vectors across documents), or corpus-grounded
-  (`method = "centroids"`: cosine similarity between the centroids of
-  each concept’s matched documents) — and
-  [`lloom_concept_map()`](https://zilinskyjan.github.io/lloomr/reference/lloom_concept_map.md)
-  plots concepts in 2D so closely related concepts appear near each
-  other (point size = prevalence). A dedicated vignette walks through
-  all three views and how to read their disagreements:
-  [`vignette("proximity")`](https://zilinskyjan.github.io/lloomr/articles/proximity.md).
+  - [`concept_similarity()`](https://zilinskyjan.github.io/lloomr/reference/concept_similarity.md)
+    computes pairwise concept similarity three ways: semantic
+    (embeddings of the concept definitions), empirical (correlation of
+    score vectors across documents), and corpus-grounded
+    (`method = "centroids"`: cosine similarity between the centroids of
+    each concept’s matched documents).
+  - [`lloom_concept_map()`](https://zilinskyjan.github.io/lloomr/reference/lloom_concept_map.md)
+    plots concepts in 2D so closely related concepts appear near each
+    other; point size shows prevalence.
+  - Map labels are placed with ggrepel when it is installed, so concepts
+    that plot close together keep readable labels.
+  - A dedicated vignette walks through the three views and how to read
+    their disagreements:
+    [`vignette("proximity")`](https://zilinskyjan.github.io/lloomr/articles/proximity.md).
 - [`lloom_session()`](https://zilinskyjan.github.io/lloomr/reference/lloom_session.md)
   gains a `chat` argument: one ellmer chat object (any provider)
   configures all three pipeline steps; step-specific arguments still

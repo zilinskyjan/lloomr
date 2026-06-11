@@ -51,7 +51,14 @@
 </ul></div>
 <div class="section level3">
 <h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
-<ul><li>Concept proximity analysis: <code><a href="../reference/concept_similarity.html">concept_similarity()</a></code> computes pairwise concept similarity three ways — semantically (embeddings of the concept definitions), empirically (correlation of score vectors across documents), or corpus-grounded (<code>method = "centroids"</code>: cosine similarity between the centroids of each concept’s matched documents) — and <code><a href="../reference/lloom_concept_map.html">lloom_concept_map()</a></code> plots concepts in 2D so closely related concepts appear near each other (point size = prevalence). A dedicated vignette walks through all three views and how to read their disagreements: <code><a href="../articles/proximity.html">vignette("proximity")</a></code>.</li>
+<ul><li>Concept proximity analysis:
+<ul><li>
+<code><a href="../reference/concept_similarity.html">concept_similarity()</a></code> computes pairwise concept similarity three ways: semantic (embeddings of the concept definitions), empirical (correlation of score vectors across documents), and corpus-grounded (<code>method = "centroids"</code>: cosine similarity between the centroids of each concept’s matched documents).</li>
+<li>
+<code><a href="../reference/lloom_concept_map.html">lloom_concept_map()</a></code> plots concepts in 2D so closely related concepts appear near each other; point size shows prevalence.</li>
+<li>Map labels are placed with ggrepel when it is installed, so concepts that plot close together keep readable labels.</li>
+<li>A dedicated vignette walks through the three views and how to read their disagreements: <code><a href="../articles/proximity.html">vignette("proximity")</a></code>.</li>
+</ul></li>
 <li>
 <code><a href="../reference/lloom_session.html">lloom_session()</a></code> gains a <code>chat</code> argument: one ellmer chat object (any provider) configures all three pipeline steps; step-specific arguments still override it.</li>
 <li>
