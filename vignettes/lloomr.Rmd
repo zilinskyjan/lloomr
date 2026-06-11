@@ -208,6 +208,10 @@ The underlying tidy matrix is available via [concept_matrix()] for custom
 plots, and [lloom_export()] produces a per-concept evidence table
 (criteria, prevalence, highlight quotes).
 
+To analyze how concepts relate to *each other* — semantically,
+empirically, and via the documents they match — see
+`vignette("proximity")`.
+
 ## Saving your results
 
 The score table is a **plain data frame** — one row per (document,

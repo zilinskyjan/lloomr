@@ -17,7 +17,8 @@
   cosine similarity between the centroids of each concept's matched
   documents) — and `lloom_concept_map()` plots concepts in 2D so
   closely related concepts appear near each other (point size =
-  prevalence).
+  prevalence). A dedicated vignette walks through all three views and
+  how to read their disagreements: `vignette("proximity")`.
 * `lloom_session()` gains a `chat` argument: one ellmer chat object (any
   provider) configures all three pipeline steps; step-specific arguments
   still override it.
