@@ -8,7 +8,7 @@ Authors@R: c(
            comment = "Copyright holder of the original Python implementation (text_lloom), from which this package is translated")
     )
 Description: An R implementation of the LLooM concept induction algorithm
-    (Lam et al., 2024, <doi:10.1145/3613904.3642830>) for extracting and
+    ([Lam et al., 2024](https://doi.org/10.1145/3613904.3642830), <doi:10.1145/3613904.3642830>) for extracting and
     applying interpretable, high-level concepts from text data using large
     language models. The pipeline distills documents into salient excerpts
     and bullet-point summaries, clusters them via text embeddings, asks an
